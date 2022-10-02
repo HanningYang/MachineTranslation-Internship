@@ -1,0 +1,1161 @@
+%%!TEX encoding = UTF-8 Unicode
+%% -*- TeX -*- -*- FR -*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Rapport de stage de YANG Hanning
+% Passage en UTF-8
+% Ensuite, on a eu des problémes car tu as pris du ISO Latin 1... Il faut maintenant
+% TOUJOURS UTILISER UTF-8.
+% 30/8/22: J'ai transformé en UTF-8, mais il faudra modifier des caractéres comme ö (Gödel).
+% Autres problémes: - il faut utiliser $\begin{array}... \end{array}$ pour les MT
+%                   - il faut être en mode math pour \begin{aligned}... \end{aligned}
+% Tu devrais utiliser des "sous-fichiers" avec des "input", ce serait plus clair.
+% 2/9/22: revue avec Xan, environnements figure, biblio, etc.
+%==============================================================================
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\documentclass[12pt, a4, english]{report}
+%\usepackage[latin1]{inputenc}
+%\usepackage[francais]{babel}
+
+\usepackage[utf8]{inputenc} 	%Si Latin 1, mettre latin1 comme option
+%\usepackage[frenchb]{babel}	%traite la typographie fran√ßaise        
+\usepackage[T1]{fontenc}   
+
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsmath,bm}
+\usepackage{dsfont}
+\usepackage{amssymb}
+\usepackage{float}
+\usepackage{pifont}
+\usepackage{url}
+\usepackage{minitoc}
+\usepackage{natbib}			%% 2/9/22
+
+\makeatletter
+\newcommand{\dotminus}{\mathbin{\text{\@dotminus}}}
+\newcommand{\@dotminus}{%
+  \ooalign{\hidewidth\raise1ex\hbox{.}\hidewidth\cr$\m@th-$\cr}%
+}
+\makeatother
+%\usepackage[T1]{fontenc}
+\setcounter{tocdepth}{4}
+\setcounter{secnumdepth}{4}
+\geometry{left=2.9cm, right=2.9cm, top=2.5cm, bottom=2.5cm}
+\title{Complexity, Learnability \& French-Chinese MT\\
+~\\
+\Large
+Internship Report\\ 
+June - August 2022\\
+\author{
+	--- M1AM Hanning YANG --- \\
+Université Grenoble Alpes - France\\
+LIG/GETALP/Ch. Boitet
+	}
+}
+
+\date{}
+\begin{document}
+\dominitoc
+\maketitle
+\newpage
+\tableofcontents
+\newpage
+%\include
+
+
+%---------------------------
+\setcounter{secnumdepth}{-1}
+%
+%\mainmatter
+%
+
+
+%%%%%%%%%%%%%%%%%%
+\section{Abstract}
+%%%%%%%%%%%%%%%%%%
+\setcounter{secnumdepth}{3}
+This is a report on my M1-MSIAM internship (Applied Mathematics program). I studied Machine Translation in general, French-Chinese in particular. I learnt different architectures of Machine Translation systems and some mathematical aspects of Statistical Machine Translation and Neural Machine Translation which is illustrated by Long Short-Term Memory. Moreover, I implemented a Sequence to Sequence model in Pytorch to test various recent improvements. Following is the plan of the internship in the beginning.
+\begin{figure}[h]			%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\centering
+	\includegraphics[width = 16cm]{./figures/first_gantt.png}	
+	\caption{Gantt plan in the beginning}
+\end{figure}
+
+
+%---------------------------
+%\section*{Introduction}
+
+%\markright{Introduction}
+
+%---------------------------
+\setcounter{secnumdepth}{-1}
+%
+%\mainmatter
+%
+\section{Introduction}
+\setcounter{secnumdepth}{3}
+
+This internship is for M1 Applied Mathematics. The requirement for the internship is that it should be related to at least one course of our program, which means that I should implement mathematical methods during the process and gain some mathematical understanding. It was difficult for me to find an internship. I ended up finding an internship in GETALP laboratory by emailing MIAI. 
+
+The interesting part of this internship is that I learnt two kinds of machine translation, which are statistical machine translation (SMT) and neural machine translation (NMT). In SMT, I gained insights into parameter estimate. Unfortunately, I wasn't able to realize a model in Moses due to technical reasons. However, I moved forward to NMT. I grasped the idea of NMT and realized a model in Pytorch.
+
+This report will be divided into three parts, which are computability theory, SMT and NMT respectively. Computability theory will mainly talk about primitive recursive functions, Turing machine and recursion theory. In SMT, a fundamental equation will be introduced first and N-Gram followed. NMT will have two main parts. They are Seq2Seq model and experiment part. 
+
+
+%---------------------------
+
+
+%---------------------------
+\part{Computability Theory}
+
+\chapter{Recursive Functions}
+
+\section*{Introduction}
+In this chapter, a formal characterization of recursive function will be introduced. With this will come a mathematical characterization of a class of objects which are called Turing machines. The use of Turing machines helps to explain what computation is by demarcating the so-called "computable functions". Then we will study recursion theory to study the notion of computability. To progress this chapter, we have studied the following source: [3][7].
+
+\minitoc
+
+\section{Primitive Recursive Functions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+In this chapter, a formal characterization of recursive function will be introduced. With this will come a mathematical characterization of a class of objects which are called Turing machines. The use of Turing machines helps to explain what computation is by demarcating the so-called "computable functions". Then we will study recursion theory to study the notion of computability.
+\subsection{Basic Functions}
+$\bullet$ \textbf{The zero function}: $(\forall\ m,n, [m^{(n)}\in RP])\ 0^{(0)}$ is enough.\\
+$\bullet$ \textbf{The successor function}: $s = \lambda x[x+1]$\\
+$\bullet$ \textbf{The projection function}: $a_{i_{1\leq i \leq n}}^{(n)} = \lambda x_1 ... x_n[x_i]$
+\subsection{Composition Operator}
+Suppose $\lambda y_1...y_k f(y_1,\ ...,\ y_k)$ is a $k$-ary total function and $\lambda \overrightarrow x g_1(\overrightarrow x),\ ...\ \lambda \overrightarrow x g_k(\overrightarrow x)$ are $n$-ary total functions.The composition operator $\sigma$ is defined by 
+\begin{center}
+	$
+	(\forall \ \overrightarrow x)\ \ \ \ [h(\overrightarrow x) = \sigma (f^{(k)}(g_1^{(\overrightarrow x)},...,g_k^{(\overrightarrow x)} ))]
+	$
+\end{center}
+\subsection{Primitive Recursion}
+Suppose that $g^{(n)}$ is an $n$-ary function and $h^{(n+2)}$ is an ($n$+2)-ary function. The recursive function $f^{(n+1)}$ is defined by
+\begin{center}
+	$\begin{aligned}
+%	$$
+	f(0, \overrightarrow x) &= g(\overrightarrow x)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (1)          \\
+	f(y+1, \overrightarrow x) &= h(y, f(y, \overrightarrow x),\overrightarrow x)\ \ \ \ \ \   (2)
+%	$$
+	\end{aligned}$
+\end{center}
+There is a unique function $f^{(n+1)} = \rho [g^{(n)},h^{(n+2)}]$ that satisfies (1) and (2), demonstrated by noetherian induction on $\mathbb{N}^{n+1}$.
+ 
+\subsection{Primitive Recursive Function}
+The set of primitive recursive function is the least set generated from the initial functions, composition and recursion.
+\subsection{Example}
+$\bullet$ Define the sum as  $f = \lambda xy[x+y]$
+
+Proof: 
+
+$
+f(0, x) = x = a_1^{(1)}(x)
+$
+
+$
+f(y+1 +x) = (x+y)+1 = s(x+y) = h(y, f(y,x), x) 
+$
+
+$
+h(y, f(y,x), x) = s(f(y,x))
+$
+
+$
+\text{If}\  f = \rho [a_1^{(1)},\sigma [s, a_3^{(2)}]]
+$
+
+$
+g = a_1^{(1)}
+$
+
+$
+h = \sigma [s, a_3^{(2)}]
+$
+\section{Turing Machines}
+\subsection{Motivation}
+The primary motivation behind the study about Turing Machines is the motive to capture the notion of computability. By the term "computability", we mean whether for a given problem, does there exist an algorithm that can solve it. i.e. what all computational problems can be solved?
+\subsection{Definition}
+The symbols $q_0,q_1,q_2,q_3,...$ will be regarded as denoting internal states; the symbols $S_0, S_1, S_2,...$ will be regarded as symbols which various machines may be capable of printing; the symbols $R$ and $L$ will represent a move of one square to the right and one square to the left, respectively.\\
+An \textbf{tape} is a finite sequence (possibly empty) of symbols chosen from the list: $q_1,q_2,q_3,q_4,...$; $S_0, S_1, S_2,...$; $R, L$. \\
+A \textbf{quadruple} is an expression having one of the following forms:\\
+(1) $q_i\ S_j\ S_k\ q_l$\\
+(2) $q_i\ S_j\ R\ q_l$\\
+(3) $q_i\ S_j\ L\ q_l$\\
+(4) $q_i\ S_j\ q_k\ q_l$\\
+A Turing machine will be defined so as to consist entirely of quadruples. A quadruple of the form 1,2 or 3 above specifies the next act of a Turing machine when in internal configuration $q_i$ and scanning a square on which appears the symbol $S_j$. Quadruple 1 indicates that the next act is to replace $S_j$ by $S_k$ on the scanned square and to enter internal configuration $q_l$. Quadruple 2 indicates motion of one square to the right followed by entry into internal configuration $q_l$. Quadruples of type 3 similarly indicate motion leftward.\\
+A \textbf{Turing machine} $Z$ is a finite (nonempty) set of quadruples that contains no two quadruples whose first two symbols are the same.\\
+The symbols $S_0$ will also be written B. and $S_1$ will be written $|$.\\
+With each number n we associate the tape expression $\overline{n}$ where $\overline{n}$ = $|^{n+1} B$.\\
+With each $k$-tuple $(n_1,n_2,...,n_k)$ of integers we associate the tape expression $(\overline{n_1,n_2,...,n_k})$, where 
+\begin{center}
+	$(\overline{n_1,n_2,...,n_k}) = \overline{n_1}B\overline{n_2}B\ldots B\overline{n_k} B$
+\end{center}
+Let $Z$ be a Turing machine. Then, for each $n$, we associate with $Z$ an n-ary function
+\begin{center}
+	$
+	\Psi_Z^{(n)}(x_1, x_2,...,x_n)
+	$
+\end{center}
+% An $n$-ary function $\lambda x_1,...,x_n [f(x_1,...,x_n)]$ is partially computable if there exists 
+An $n$-ary function $\lambda x_1\cdots x_n [f(x_1,...,x_n)]$ is partially computable if there exists a Turing machine $Z$ such that
+\begin{center}
+	$(\forall \overrightarrow x) f(\overrightarrow x) = 
+	\begin{cases}
+		\Psi_Z^{(n)}(\overrightarrow x)	&	\mbox{if and when the computation halts} \\
+		\downarrow								&	\mbox{otherwise}
+	\end{cases}
+	$
+%	\forall \ \overrightarrow x \ \ \ \   [f(\overrightarrow x) = \Psi_Z^{(n)}(\overrightarrow x)]\\
+%	\Psi_Z^{(n)}(\overrightarrow x) = \begin{cases}
+%		\text{number 1 on the bond} & \downarrow\\
+%		\uparrow & \text{otherwise}
+%	\end{cases}
+%	$
+\end{center}
+In this case we say that $Z$ computes $f$. If, in addition, $f$ is a total function, then $f$ is called computable.
+
+
+
+\subsection{A Simple Example}
+\textbf{Addition}. Let $f = \lambda xy[x+y]$. We shall construct a Turing machine $Z$ which computes $f$, that is 
+\begin{center}
+	$
+	\forall \ x,y, \ \ 
+	\Psi_Z^{(2)}(x,y) = x+y
+	$
+\end{center}
+We take $Z$ to consist of the quadruples
+
+\begin{center}					%% Il faut plut√ôt utiliser \begin{array} ...
+%	$\begin{array}{llll}
+%	q_0\ |\ B\ q_0\\
+%	q_0\ B\ R\ q_1\\
+%	q_1\ |\ R\ q_1\\
+%	q_1\ B\ R\ q_2\\
+%	q_2\ |\ B\ q_2\\
+%	\end{array}$
+	$\begin{array}{llll}
+	q_1  & |	& B &	q_1	\\
+	q_1  & B	& R & q_2	\\
+	q_2  & | & R & q_2	\\
+	q_2  & B & R & q_3	\\
+	q_3  & | & B & q_3	
+	\end{array}$
+\end{center}
+
+
+
+1. Let's start with the configuration, $q_0(\overline{m_1, m_2}) = q_0\overline{m_1}B\overline{m_2} = q_0||^{m_1}B||^{m_2}$. \\
+
+2. Then
+\begin{center}
+$	\begin{aligned}
+%		$
+		q_0\overline{m_1}B\overline{m_2} &= q_0||^{m_1}B||^{m_2}\\
+		& \vdash q_0 B |^{m_1}B ||^{m_2}\\
+		& \vdash Bq_1 |^{m_1}B||^{m_2}\\
+		& \vdash ...\\
+		& \vdash B|^{m_1}q_1 B||^{m_2}\\
+		& \vdash B|^{m_1}Bq_2||^{m_2}\\
+		& \vdash B|^{m_1}Bq_2B|^{m_2}
+%		$
+	\end{aligned}
+	$
+\end{center}
+
+3. If it converges, the output will be $\rightarrow B|^{m_1}Bq_3B|^{m_2}$. Thus, the result is  
+\begin{center}
+$	\begin{aligned}
+%		$
+		\Psi_Z^{(2)}(m_1,m_2) &= <B|^{m_1}Bq_3B|^{m_2}>\\
+		&=m_1+m_2
+%		$
+	\end{aligned}
+$
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Fundamental Theorems}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Gödel Index}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+We see a number as an index for a problem/function if it is the Gödel number of a programme that solves/calculates the problem/function.
+\subsubsection{Gödel Index for Computable Function}
+Suppose $f^{(n)}$ ia an $n$-ary computable function. A number $a$ is an index for $f^{(n)}$ if $f^{(n)} = \varphi_a^{(n)}$.
+\subsubsection{Padding Lemma}
+Each partial recursive function has $\bm{\aleph_0}$ distinct indices.
+\subsection{Universal Turing Machine}
+A Universal Turing Machine (UTM) is a Turing machine which works as follows:\\
+Taking $(e,x)$ as input, it simulates the action of $T_e$ on input $x$.
+
+%\subsection{$s-m-n$ Theorem}
+\subsection{s-m-n Theorem}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\textbf{s-m-n Theorem}: For every $m,n\geq1$, there exists a recursive function $s_n^m$ of $m+1$ variables such that for all $x,y_1,...,y_m$,
+\begin{center}
+	$
+	\lambda z_1...z_n[\varphi_x^{(m+n)}(y_1,...,y_m,z_1,...,z_n)] = \varphi_{s_n^m(x,y_1,...,y_m)}^{(n)}
+	$
+\end{center}
+In practical terms, the theorem says that for a given programming language and positive integers $m$ and $n$, there exists a particular algorithm that accepts as input the source code of a program with $m+n$ free variables, together with $m$ values. This algorithm generates source code that effectively substitutes the values for the first $m$ free variables, leaving the rest of the variables free.
+
+
+\subsection{Enumeration Theorem}
+\textbf{Enumeration Theorem}: 
+\begin{center}
+	$
+%	(\forall n\in \mathbb{N})\ (A\subset \mathbb{N})\ (\forall x\in \mathbb{N})\ \ \ 
+	(\forall n\in \mathbb{N}) (A\subseteq \mathbb{N}) (\forall x\in \mathbb{N})
+	~[\lambda \overrightarrow y\cdot \varphi_z^{A;n+1}(x,\overrightarrow y) = \varphi_x^{A;n} ]
+	$
+\end{center}
+
+There are universal programs that simulate all the programs. A program is universal if upon receiving the Gödel number of a program it simulates the program indexed by the number.
+
+Consider the function $\lambda xy[\psi (x,y)]$ defined as follows
+\begin{center}
+	$
+	\lambda xy[\psi (x,y)]= \varphi_x(y)
+	$
+\end{center}
+In an obvious sense $\lambda x[\psi (x,\_)]$ is a universal function for the unary functions
+\begin{center}
+	$
+	\varphi_0, \varphi_1,\varphi_2,\varphi_3,...
+	$
+\end{center}
+The \textbf{universal function} for $n$-ary computable functions is the $(n+1)$-ary function $\psi_U^{(n)}$ defined by
+\begin{center}
+	$
+	\lambda ex_1...x_n[\psi_U(e, x_1, ...,x_n)] = \varphi_e^{(n)}(x_1,...,x_n)
+	$
+\end{center}
+We write $\psi_U$ for $\psi_U^{(1)}$.
+
+By enumeration theorem, for each $n$, the universal function $\psi_U^{(n)}$ is computable.
+
+\subsection{Recursion Theorem}
+Let $f$ be a total unary computable function. 
+Then there is a number $n$ such that $\varphi_{f(n)} = \varphi_n$
+
+Proof:
+
+$\bullet$ Consider the function $\psi$ defined as follows:
+\begin{center}
+	$
+	\psi(x,y)=
+	\begin{cases}
+		\varphi_{\varphi_{x}(x)}(y)	&\text{ if $\varphi_x(x)~~s\downarrow$}\\
+		\uparrow								&\text{otherwise}
+	\end{cases}
+	$
+\end{center}
+
+Clearly, the function $\psi$ is computable, since the following algorithm computes it: run $\varphi_x$ on input $x$; if it halts with output $w$, run $\varphi_w$ on input $y$; if it halts output the result. Equivalently, if $\varphi_U$ is the function corresponding to the Universal Turing Machine, then $\psi(x,y):=\varphi_U(\varphi_U(x,x),y)$.
+
+$\bullet$ Now by the s-m-n theorem there is a total, computable primitive recursive function $d$ such that
+%\begin{center}
+%	$
+$$	\varphi_{d(x)}(y) = \psi(x,y) $$
+%	$
+%\end{center}
+namely, $d$ is defined by $d(x)= S_1^1(e,x)$ where $e$ is the index of $\psi$.
+
+$\bullet$ Since $f$ and $d$ are both total computable functions, $f\circ d$ is also a total computable function. let $z$ be one of its index, i.e.
+
+\begin{center}
+	$
+	\varphi_z = f\circ d
+	$
+\end{center}
+Note that since $\varphi_z$ is total, we have that in particular $\varphi_z(z)\ \downarrow$, so $\psi(z,y) = \varphi_{\varphi_z(z)}(y)$ for all $y$.
+
+$\bullet$ For every $y$, we get
+\begin{center}
+	$
+	\varphi_{d(z)}(y) = \psi(z,y) = \varphi_{\varphi_z(z)}(y) = \varphi_{(f\circ d)(z)}(y)
+	$
+\end{center}
+and so
+\begin{center}
+	$
+	\varphi_{d(z)} = \varphi_{f(d(z))}
+	$
+\end{center}
+and hence $d(z)$ is the fixed point $n$ that we were looking for.
+
+\textbf{Intuitive Consequences}
+
+Basically, the intuitive consequences of the recursive theorem is that, when defining a computable function $\varphi_n$, we may use the number $n$ in the definition.
+
+For example: there is an $n$ such that $W_n = dom(\varphi_n) = \{n\}$.
+
+$\bullet$ Define 
+
+\begin{center}
+	$
+	\psi(x,y)=
+	\begin{cases}
+		x & \text{if $x=y$}\\
+		\uparrow & \text{if $x\neq y$}
+	\end{cases}
+	$
+\end{center}
+By the s-m-n theorem there is a recursive $f$ such that $\varphi_{f(x)}(y)= \psi(x,y)$. Let $n$ be the fixed point of $f$. Then for all $y$
+\begin{center}
+	$
+	\varphi_n(y) = \varphi_{f(n)}(y) = \psi(n,y)
+	$
+\end{center}
+so $W_n =\{n\}$
+
+$\bullet$ Define $\psi(x,y)=x$. Then by the s-m-n theorem there is a recursive $f$ such that $\varphi_{f(x)}(y) = \psi(x,y)$. Let $n$ be a fixed point of $f$. Then for all $y$ we have $\varphi_n(y) = \varphi_{f(n)}(y) = \psi(n,y) = n$.
+
+This situation has some interesting applications: since we can see $n$ as representing the code of $\varphi_n$, the function $\varphi_n$ can be said to "output its own code".
+
+
+%---------------------------
+\part{Statistical Machine Translation}
+% 2
+\chapter{Statistical Machine Translation}
+\subsection*{Introduction}
+This chapter will be based on the fundamental statistical equation from a highly cited paper from 1993 by Peter F. Brown* from IBM T.J. Waston Research Center, "The mathematics of statistical machine translation: Parameter estimation"\footnote{Peter F. Brown, Stephen A. Delle Pietra, Vincent J. Bella Pietra, Robert L. Mercer, 
+\begin{itshape}The mathematics of statistical machine translation: Parameter estimate,
+\end{itshape} 1994
+}. 
+Then we will introduce one of the models used in statistical machine translation, which is the language model. The most common method for language modeling is the use of N-Gram language models. We use another 2 references as sources\footnote{\url{https://devopedia.org/n-gram-model}}\footnote{\url{https://towardsdatascience.com/perplexity-in-language-models-87a196019a94}}.
+
+\renewcommand\thefootnote{\ding{\numexpr171+\value{footnote}}}
+\minitoc
+
+
+%2.1
+\section{Fundamental statistical equation}
+According to these authors, the general idea behind statistical machine translation is the following:
+
+There is a sentence we want to translate from French to English. Since we have a large number of parallel texts of English and French translations, we will use these to determine a statistical probability that a given English sentence corresponds to the French sentence, do this for many English sentences, and then pick the English sentence with the highest probability. The same principle applies to a word, a paragraph, or a whole text.
+
+The probability for the English translation is determined using a commonly-used equation called Bayes Rule, which is $P(s|o) = P(o|s)P(s)/P(o)$, which means the probability of the state given the observation, $P(s|o)$, equals the probability of the observation given the state, $P(o|s)$, times the probability of the state happening in general, $P(s)$, divided by the probability of the observation happening in general, $P(o)$. In this case the state is the English translation and the observation is the original French sentence. Since $P(o)$, the probability of the French sentence, is the same for every English translation, and we are only connected with comparing the probabilities of different English translations, we need only consider $P(o|s)P(s)$.
+
+Now if we replace the variables of the equation, $s$ with $f$ for a French sentence and $o$ with $e$ for an English sentence, we arrive at the fundamental equation of statistical machine translation:
+$$
+	\tilde e = \underset{e\in e^*}{\mathrm{argmax}} P(e|f) = \underset{e\in e^*}{\mathrm{argmax}} P(f|e)P(e)
+$$
+
+This means that one English translation $\tilde e$ is the English sentence that maximizes the equation $p(f|e)p(e)$.
+
+To calculate $\tilde e$ we must understand the meaning behind $P(f|e)$ and $P(e)$. $P(f|e)$ in terms of Bayes rule represents the likelihood: how likely is it that the French sentence would be a translation of (or would occur given) the English sentence. $P(e)$ represents the prior (our prior knowledge): how likely is it that the English sentence $e$ would ever be used.
+
+
+%2.2   %%%%%%%%%%%%%%%%%
+\section{Language Model}
+%%%%%%%%%%%%%%%%%%%%%%%%
+Language models determine the probability of the next word by analyzing the text in data. These models interpret the data by feeding it through algorithms.
+
+The algorithms are responsible for creating rules for the context in natural language. The models are prepared for the prediction of words by learning the features and characteristics of a language. With this learning, the model prepares itself for understanding phrases and predicting the next words in sentences.
+
+For training a language model, a number of probabilistic approaches are used. These approaches vary on the basis of the purpose for which a language model is created. The amount of text data to be analyzed and the math applied for analysis makes a difference in the approach followed for creating and training a language model.
+
+For example, a language model used for predicting the next word in a search query will be absolutely different from those used in predicting the next word in a long document (such as Google Docs). The approach followed to train the model would be unique in both cases.
+
+
+
+% 2.2.1 %%%%%%%%%%%
+\subsection{N-Gram}
+%%%%%%%%%%%%%%%%%%%
+N-gram is an algorithm based on statistical language model. Its basic idea is to perform a sliding window operation of size N on the content of the text according to bytes, forming a sequence of byte fragments of length N. Each byte segment is called a gram. The frequency of occurrence of all grams is counted, and filtered according to a pre-set threshold to form a list of key grams, which is the vector feature space of this text. A gram is a feature vector dimension. The basic hypothesis is that the occurrence of the $N$th word is only related to the previous $N-1$ words, and not related to any other words, and the probability of the entire sentence is the product of the probability of occurrence of each word. These probabilities can be obtained by directly counting the number of simultaneous occurrences of $N$ words from the corpus.
+
+N-Gram is the simplest model that assigns probabilities to sentences and sequences of words. An N-Gram is a sequence of $n$ words: a 2-gram (which we will call bigram) is two-word sequence of words like "please turn", "turn your", or "your homework", and  a 3-gram (trigram) is a three-word sequence of words like "please turn your", or "turn your homework". We will see how to use N-Gram to estimate the probability of the last word of an N-Gram given the previous words, and also to assign probabilities to entire sequences.
+
+Let's start with computing $P(w|h)$, the probability of a word $w$ given some history $h$. Suppose the history $h$ is "its water is so transparent that" and we want to know the probability that the next word is the:
+$$
+	P(the|its\ water \ is \ so \ transparent \ that) \ \ \ \ \ (2.1)
+$$
+
+One way to estimate this probability is from the relative frequency counts: take a very large corpus, count the number of times we see "its water is so transparent that", and count the number of times this is followed by "the". This would be answering the question "Out the times we saw the history $h$, how many times was it followed by the word $w$", as follows:
+$$
+	P(the|its\ water \ is \ so \ transparent \ that) = C(its\ water \ is \ so \ transparent \ that \ the)/C(its\ water \ is \ so \ transparent \ that)\ \ \ \ \ (2.2)
+$$
+
+With a large enough corpus, we can compute these counts and estimate the probability from equation 2.2.
+
+While this method of estimating probabilities directly from counts works fine in many cases, it turns out that the corpus isn't big enough to give us good estimates in most cases. This is because language is creative; new sentences are created all the time, and we won't always be able to count entire sentences. Even simple expressions of the example sentence may have counts of zero.
+
+Similarly, if we wanted to know the joint probability of an entire sequence of words like "its water is so transparent", we could do it by asking "out of all possible sequences of five words, how many of them are its water is so transparent". We would have to get the count of its water is so transparent and divide by the sum of the counts of all possible five word sequences. That is a lot of work. For this reason, Brown will use more clever ways of estimating the probability of a word $w$ given a history $h$, or the probability of an entire word sequence $W$.
+
+In the following, we will use $P(the)$ to represent the probability of a particular random variable $X_i$ taking on the value "the". We'll represent a sequence of $N$ words either as $w_1...w_n$ or $w_{1:n}$ (so the expression $w_{1:n-1}$ means the string $w_1,w_2,...,w_{n-1}$). For the joint probability of each word in a sequence having a particular value $P(X_1=w_1,X_2=w_2,...,X_n=w_n)$, we will use $P(w_1,w_2,...,w_n)$.
+
+We can compute the probabilities of entire sequences like $P(w_1,w_2,...,w_n)$ by decomposing the probability through the chain rule of probability:
+\begin{center}
+%$	\begin{aligned}
+%		$
+%		P(X_1...X_n) &= P(X_1)P(X_2|X_1)P(X_3|X_{1:2})...P(X_n|X_{1:n-1})\\
+%		&= \prod_{k=1}^n P(X_k|X_{1:k-1})~~~~~~~~~~~~~ (2.3)
+%		$	
+%	\end{aligned}
+%$
+$	\begin{array}{llc}
+		P(X_1...X_n) 	&= P(X_1)P(X_2|X_1)P(X_3|X_{1:2})\dots P(X_n|X_{1:n-1})	&	\\
+							&= \prod_{k=1}^n P(X_k|X_{1:k-1})								& (2.3)
+	\end{array}
+$
+\end{center}
+
+
+Applying the chain rule to words, we get
+\begin{center}
+$	\begin{aligned}
+%		$
+		P(w_{1:n}) &= P(w_1)P(w_2|w_1)P(w_3|w_{1:2})...P(w_n|w_{1:n-1})\\
+		&= \prod_{k=1}^n P(w_k|w_{1:k-1})\ \ \ \ \ (2.4)
+%		$
+	\end{aligned}
+$
+\end{center}
+
+
+
+
+The chain rule shows the link between computing the joint probability of a sequence and computing the conditional probability of a word given previous words. Equation 2.4 suggests that we could estimate the joint probability of an entire sequence of words by multiplying together a number of conditional probabilities. But using the chain rule, we still don't know any way to compute the exact probability of a word given a long sequence of preceding words, $P(w_n|w_{1:n-1})$.
+
+The intuition of the N-Gram approach is that instead of computing the probability of a word given its entire history, we can approximate the history by just the last few words.
+
+The bigram , for example, approximates the probability of a word given all the previous words $P(w_n|w_{1:n-1})$ by using only the conditional probability of the preceding word $P(w_n|w_{n-1})$. In other words, instead of computing the probability 
+$$
+	P(the|its \ water \ is \ so \ transparent \ that)\ \ \ \ \ (2.5)
+$$
+
+we approximate it with the probability
+$$
+	P(the|that)\ \ \ \ \ (2.6)
+$$
+
+When we use a bigram to predict the conditional probability of the next word, we are thus making the following approximation:
+$$
+	P(w_n|w_{1:n-1})\approx P(w_n|w_{n-1})\ \ \ \ \ (2.7)
+$$
+
+The assumption that the probability of a word depends only on the previous word is called a Markov assumption. Markov models are the class of probabilistic models that assume we can predict the probability of some future unit without looking too far into the past. We can generalize the bigram (which looks one word into the past) to the trigram (which looks two words into the past) and thus to the N-Gram (which looks $n-1$ words into the past).
+
+We'll use $N$ here to mean the N-Gram size, so $N=2$ means bigrams and $N=3$ means trigrams. Then the general equation for this N-Gram approximation to the conditional probability of the next word in a sequence is as follows:
+$$
+	P(w_n|w_{1:n-1})\approx P(w_n|w_{n-N+1:n-1})\ \ \ \ \ (2.8)
+$$
+
+Given the bigram assumption for the probability of an individual word, we can compute the probability of a complete word sequence by substituting equation 2.7 into equation 2.4:
+$$
+	P(w_{1:n})\approx \prod_{k=1}^n P(w_k|w_{k-1})\ \ \ \ \ (2.9)
+$$
+
+An intuitive way to estimate these bigram or N-Gram probabilities is called maximum likelihood estimation (MLE). We get the MLE estimate for the parameters of an N-Gram by getting counts from a corpus, and normalizing the counts so that they lie between 0 and 1.
+
+For example, to compute a particular bigram probability of a word $w_n$ given a previous word $w_{n-1}$, we'll compute the count of the bigram $C(w_{n-1}w_n)$ and normalize by the sum of all the bigrams that share the same first word $w_{n-1}$:
+$$
+	P(w_n|w_{n-1}) = \frac{C(w_{n-1}w_n)}{\sum_w C(w_{n-1}w)}\ \ \ \ \ (2.10)
+$$
+
+We can simplify equation 2.10 since the sum of all bigram counts that start with a given word must be equal to the unigram count for that word $w_{n-1}$:
+$$
+	P(w_n|w_{n-1}) = \frac{C(w_{n-1}w_n)}{C(w_{n-1})}\ \ \ \ \ (2.11)
+$$
+
+We will work through an example using a mini-corpus of three sentences. First we need to augment each sentence with a special symbol <s> at the beginning of the sentence, to give us the bigram context of the first word. Also, we need a special end-symbol </s>.
+
+<s> I am Sam </s>
+
+<s> Sam I am </s>
+
+<s> I do not like green eggs and ham </s>
+
+Here are the calculations for some of the bigram probabilities from this corpus
+$$	\begin{aligned}
+%		$
+		&P(I|<s>) = \frac{2}{3} = 0.67\ \ \ \ &P(Sam|<s>) = \frac{1}{3} = 0.33 \ \ \ \ &P(am|I) = \frac{2}{3} = 0.67\\
+		&P(</s>|Sam) = \frac{1}{2} = 0.5\ \ \ \ &P(Sam|am) = \frac{1}{2} = 0.5\ \ \ \ &P(do|I) = \frac{1}{3} = 0.33
+%		$
+	\end{aligned}
+$$
+
+For the general case of MLE N-Gram parameter estimation:
+$$
+	P(w_n|w_{n-N+1:n-1}) = \frac{C(w_{n-N+1:n-1}\ w_n)}{C(w_{n-N+1:n-1})}\ \ \ \ \ (2.12)
+$$
+
+Equation 2.12 estimates the N-Gram probability by dividing the observed frequency of a particular sequence by the observed frequency of a prefix. The ratio is called a relative frequency. The use of relative frequencies as a way to estimate probabilities is an example of MLE. In MLE, the resulting parameter set maximizes the likelihood of the training set $T$ given the model $M$ (i.e., $P(T|M)$). 
+\subsection{Perplexity in Language Models}
+Perplexity (sometimes called $PP$ for short) is an evaluation measure for language models. The perplexity of a language model on a test set is the inverse probability of the test set, normalized by the number of words.For a test set $W=w_1w_2...w_N$, :
+$$	\begin{aligned}
+%		$$
+		PP(W)&=P(w_1w_2...w_N)^{-\frac{1}{N}}\\
+		&=\sqrt[N]{\frac{1}{P(w_1w_2...w_N)}}
+%		$$
+	\end{aligned}
+$$
+
+
+\subsubsection{Probability of the test set}
+First of all, we want our model to assign high probabilities to sentences that are real and syntactically correct, and low probabilities to fake, incorrect, or highly infrequent sentences. Assuming our dataset is made of sentences that are in fact real and correct, this means that one model will be the one that assigns the highest probability to the test set. Intuitively, if a model assigns a high probability to the test set, it means that it is not surprising to see it (it's not perplexed by it), which means that it has a good understanding of how the language works.
+
+\begin{figure}[h]			%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\centering
+	\includegraphics[width = 12cm]{./figures/perplexity_high-low.png}	
+	\caption{Low perplexity VS High perplexity}
+\end{figure}
+
+\subsubsection{Normalising}
+However, it's worth nothing that datasets can have varying numbers of sentences, and sentences can have varying numbers of words. Adding more sentences introduces more uncertainty, so other things being equal a larger test set is likely to have a lower probability than a smaller one. Ideally, we'd like to have a metric that is independent of the size of the dataset. We could obtain this by normalising the probabilities of the test set by the total number of words, which would give us a per-word measure.
+
+For example, let's take a unigram model:
+$$
+	P(W) = P(w_1,w_2,...w_N) = P(w_1)P(w_2)...P(w_N) = \prod_{i =1}^N P(w_i)
+$$
+
+To normalize this probability which is given by a product, we can take the log probability, which turns the product into a sum:
+$$
+	ln(P(W))=ln(\prod_{i=1}^N P(w_i))=\sum_{i=1}^N lnP(w_i)
+$$
+
+Now we can normalize this by dividing by $N$ to obtain the per-word log probability:
+$$
+	\frac{ln(P(W))}{N} = \frac{\sum_{i+1}^N lnP(w_i)}{N}
+$$
+
+Then remove the log by exponentiating:
+$$	\begin{aligned}
+%		$$
+		e^{\frac{ln(P(W))}{N}} &= e^{\frac{\sum_{i=1}^N lnP(w_i)}{N}}\\
+		(e^{ln(P(W))})^{\frac{1}{N}} &= (e^{\sum_{i=1}^N lnP(w_i)})^{\frac{1}{N}}\\
+		P(W)^{\frac{1}{N}} &= (\prod_{i=1}^N P(w_i))^{\frac{1}{N}}
+%		$$
+	\end{aligned}
+$$
+
+Normalization is obtained by taking the $N$-th root.
+
+\subsubsection{Bringing it all together}
+Now going back to our original equation for perplexity, we can see that we can interpret it as the inverse probability of the test set, normalized by the number of words in the test set:
+$$	\begin{aligned}
+%		$$
+		PP(W)&=P(w_1w_2...w_N)^{-\frac{1}{N}}\\
+		&=\sqrt[N]{\frac{1}{P(w_1w_2...w_N)}}
+%		$$
+	\end{aligned}
+$$
+
+$\bullet$ Since we are taking the inverse probability, a lower perplexity indicates a better model.
+
+$\bullet$ In this case W is the test set. It contains the sequence of words of all sentences one after the other, including the start-of-sentence and end-of-sentence tokens, <SOS> and <EOS>.
+
+For example, a test set with two sentences would look like this: W = (<SOS>, This, is, the, first, sentence, ., <EOS>, <SOS>, This, is, the, second, one, ., <EOS>)
+
+N is the count of all tokens in our test set, including SOS/EOS and punctuation. In this example, N = 16.
+\subsection{Advantages and disadvantages of the N-gram approach}
+The advantage of the N-gram model is that it contains all the information that the first N-1 words can provide. These words have a strong binding force on the appearance of the current word, but its disadvantage is that it requires a considerable amount of training text to determine the parameters of the model. When N is large, the parameter space of the model is too large. So the common value of N is generally 1,2. There is also a data smoothing problem caused by data sparseness. The main solution is to make the sum of all N-gram probabilities 1 and make some $\varepsilon$.
+
+In addition, compared with the linguistic rule model of word representation in continuous space (such as the word vector constructed by word2vec), the N-gram language model has the following limitations:
+
+The N-gram model is constructed based on discrete unit words that do not have any genetic attributes between each other, and thus does not have the semantic advantage satisfied by word vectors in continuous space: words with similar meanings have similar word vectors, and thus become a system When the model adjusts parameters for a word or word sequence, words and word sequences with similar meanings will also change.
+
+Therefore, if the keyword weight is known to be very large, the N-gram model may be more appropriate.
+
+
+%---------------------------
+\part{Neural Machine Translation}
+\chapter{Long Short-Term Memory (LSTM) and Sequence to Sequence model}
+\section*{Introduction}
+The chapter will present the basic concepts of feed-forward neural networks and recurrent neural networks. The presentation is adopted from 4 references\footnote{\url{https://builtin.com/data-science/recurrent-neural-networks-and-lstm}} \footnote{\url{https://colah.github.io/posts/2015-08-Understanding-LSTMs/}} \footnote{\url{https://medium.com/analytics-vidhya/encoder-decoder-seq2seq-models-clearly-explained-c34186fbf49b}} \footnote{\url{https://medium.com/analytics-vidhya/seq2seq-models-french-to-english-translation-using-encoder-decoder-model-with-attention-9c05b2c09af8}}. 
+
+Long short-term memory (LSTM) networks are an extension for recurrent neural networks, which basically extends the memory. With regard to this, the working principle of LSTM will be clearly explained. Followed by LSTM, Sequence-to-Sequence model is about to be introduced. A typical Seq2Seq model consists of an encoder and decoder which are themselves two separate neural networks combined into giant network, Both encoder and decoder are typically LSTM or GRU models. In this chapter, we will only use LSTM models. 
+
+\minitoc
+
+\section{Feed-Forward Neural Networks and Recurrent Neural Networks}
+Recurrent neural networks are a class of neural networks that are helpful in modelling data sequences. Derived from feed-forward networks, RNNs try to mimic some characteristics of human brain functioning. RNNs produce predictive results in data sequence that other algorithms can't. RNNs are now heavily used in Machine Translation.
+
+\subsection{Feed-Forward Neural Networks and connections}
+A neural network simply consists of nodes. These nodes are connected in some way. Then each node holds a number, and each connection holds a weight.
+
+These nodes are split between the input, hidden and output layer. In practice, there are many layers and there is no general best number of layers.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 7cm]{./figures/neural-networks-3.png}	
+	\caption{Feedforward Neural Network example}
+\end{figure}
+
+In Fig 3.1, white circles corresponding to nodes, and yellow arrows are the connections (each having a weight) from one node to another node. 
+
+The idea is that we input data into the input layer, which sends the numbers from our data ping-ponging forward, through the different connections, from one node to another in the network. Once we reach the output layer, we hopefully have the number we wished for.
+
+The input data is just our dataset, where each observation is run through sequentially from $x=1, \dots, x=i$. Each node has some activation - a value between 0 and 1, where 1 is the maximum activation and 0 is the minimum activation a node can have.
+
+\subsubsection{From input layer to hidden layer}
+Each node has an activation $a$ and each arc that connects to a new node has a weight $w$. Then we can multiply activations by weights and pass it to a single node in the next layer, from the first weights and activations $w_1a_1$ all the way to $w_na_n$:
+$$	w_1a_1 + w_2a_2 + w_na_n = \text{ activation of a new node}$$
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 7cm]{./figures/input-hidden.png}	
+	\caption{Input layer to hidden layer}
+\end{figure}
+
+That is, multiply $n$ number of weights and activations, to get the activation of a new node.
+$$
+	1.1 \times 0.3 + 2.6 \times 1.0 = 2.93
+$$
+
+the procedure is the same moving forward in the network of nodes, hence the name feedforward neural network.
+
+
+\subsubsection{Activation Functions}
+We also have an activation function, most commonly a sigmoid function, which just scales the output to be between 0 and 1. 
+$$
+	sigmoid = \sigma = \frac{1}{1+e^{-x}}
+$$
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 7cm]{./figures/sigmoid.png}
+	\caption{Sigmoid function}
+\end{figure}
+
+We wrap the equation for new nodes with the activation:
+$$
+	\sigma(w_1a_1+w_2a_2+...+w_na_n) = \text{ activation of a new node}
+$$
+
+\subsubsection{From hidden layer to output layer}
+The activation function is only used in the hidden layer. The output node is simply the sum of the hidden layer outputs times the weights between hidden layer and the output layer.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 7cm]{./figures/hidden-output.png}
+	
+	\caption{Hidden layer to output layer}
+\end{figure}
+%\subsubsection{Learn the weights}
+%The weights are learned by finding the values that minimize the error by trying many different numbers as the weights. The error is used to move the weights in the right direction by moving worse performing weights faster than the rest.\\
+
+%\textbf{Backpropogation Training Algorithm}\\
+%$\bullet$ Select how many hidden nodes we want to use\\
+%$\bullet$ Set a learning rate (small value greater than 0 and less than 1)\\
+%$\bullet$ Initialize random weights between each layer for every node (between -0.5 and 0.5)\\
+%$\bullet$ Feed the data forward: multiply input values times weights for the hidden layers; add those products together and use the sum in the activation function; take the results of the hidden layer and multiply them by weights for the output layer; add up the product for the given output node as the result for that node \\
+%$\bullet$ Calculate the derivative of the error for the output layer: using the sigmoid function
+%\begin{center}
+%	grad = output*(1-output)*(actual-output)
+%\end{center}
+%$\bullet$ Calculate the derivative of the error for the hidden layer:
+%\begin{center}
+%	output of hidden * (1 - output of hidden) * SUM(weights between hidden and output layers * grad)
+%\end{center}
+%$\bullet$ Update each network weight based on gradients:
+%\begin{center}
+%	new weight = current weight * learning rate * gradient
+%\end{center}
+
+
+
+\subsection{Recurrent Neural Networks}
+In a RNN the information cycles also through loops. When it makes a decision, it considers the current input and also what it has learned from the input.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 6cm]{./figures/recurrent.png}	
+	\caption{Recurrent Neural Networks}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 3cm]{./figures/one_loop.png}	
+	\caption{a loop of RNN}
+\end{figure}
+
+In the above diagram, the input layer $X_t$ processes the initial input and passes it to the middle layer A. The middle layer consists of multiple hidden layers, each with its activation functions, weights and biases. These parameters are standardized across the hidden layer so that instead of creating multiple hidden layers, it will create one and loop it over. A recurrent neural network can be thought of as multiple copies of the same network, each passing a message to a successor.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 12cm]{./figures/RNN-unroll.png}
+	\caption{An unrolled RNN}
+\end{figure}
+
+\begin{table}[htb]   
+\begin{center}   
+%\caption{}  
+\label{table:1} 
+\begin{tabular}{|c|c|}   
+\hline   \textbf{$x_t$} &  input data at current timestamp\\   
+\hline   \textbf{$y_t$} & output  \\ 
+\hline   \textbf{$Wxh$} & weights for transforming $x_t$ to RNN hidden state (not prediction)  \\  
+\hline   \textbf{$Why$} & weights for transforming RNN hidden state to prediction  \\    
+\hline   \textbf{$h_t$} & hidden state  \\ 
+\hline   \textbf{$circle$} & RNN cell  \\   
+\hline   
+\end{tabular}   
+\end{center}   
+\end{table}
+
+%\iffalse
+%
+%\subsubsection{Two issues of standard RNNs}
+%% definition of gradient? 
+%RNNs have incredible performance in sequence learning. However, there are two major obstacles related to gradient RNNs have to deal with. A gradient is a partial derivative with respect to its inputs. It can measure how much the output of a function changes if the input is changed.
+%\paragraph{Exploding gradients} \hfill \break
+%An error gradient is the direction and magnitude calculated during the training of a neural network that is used to update the network weights in the right direction and by the right amount.\\
+%In deep networks or recurrent neural networks, error gradients can accumulate during an update and result in very large gradients. These result in large updates to the network weights, and in turn, an unstable network. At an extreme, the values of weights can become so large as to overflow and result in NaN values. Fortunately, this problem can be solved easily by truncating or squashing gradients.
+%
+%\paragraph{Vanishing gradients} \hfill \break
+%The vanishing gradient problem describes a situation encountered in the training of neural networks where the gradients used to update the weights shrink exponentially. As a consequence, the weights are not updated anymore, and learning stalls. It leads to poor learning, which is called "cannot handle long term dependencies". Thankfully, this problem can be solved through the concept of Long Short-Term Memory introduced by Sepp Hochreiter and Juergen Schmidhuber.
+%\fi
+%
+
+\section{Long Short-Term Memory (LSTM)}
+Long Short-Term Memory (LSTM) networks are an extension of RNN that extend the memory, capable of learning long-term dependencies. LSTMs are used as the building blocks for the layers of a RNN. LSTM assigns data "weights" which helps RNNs to either let new information in, forget information or give it importance enough to impact the output.
+
+LSTMs enable RNNs to remember inputs over a long period of time. This is because LSTMs contain information in a memory, like the memory of a computer. The LSTM can read, write and delete information from its memory.
+
+All recurrent neural networks have the form of a chain of repeating modules of neural network. In standard RNNs, this repeating module will have a very simple structure, such as a single tanh layer.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 14cm]{./figures/RNN_SingleLayer.png}
+	\caption{Repeating module in a standard RNN}
+\end{figure}
+Instead, the repeating module of LSTMs has four layers interacting in a very special way. 
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 14cm]{./figures/LSTM_4layers.png}
+	\caption{Repeating module in an LSTM}
+\end{figure}
+
+\subsection{LSTM architecture}
+The key to LSTMs is the cell. Every unit of the LSTM network is known as a "cell". Each cell is composed of 3 inputs ($x_t, h_{t-1}, C_{t-1}$) and 2 outputs ($h_t, C_t$).
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 15cm]{./figures/Basic-structure-of-a-long-short-term-memory-LSTM-unit.png}	
+	\caption{a simple LSTM black box}
+\end{figure}
+
+%%%%%%%%%%%%%%%
+%\end{document}
+%%%%%%%%%%%%%%%
+
+
+\label{table:1} 
+\begin{center}
+\begin{tabular}{|c|c|c|}   
+\hline   \textbf{Inputs} 	& \textbf{$x_t$} 		&  taken at timestamp t\\   
+\hline    						& \textbf{$h_{t-1}$} & previous hidden state \\ 
+\hline    						& \textbf{$C_{t-1}$} & previous cell state  \\  
+\hline    \textbf{Outputs} & \textbf{$h_t$} 		& updated hidden state  \\    
+\hline    						& \textbf{$C_t$} 		& current cell state  \\ 
+\hline   
+\end{tabular}   
+\end{center}   
+%\end{table}
+%%%%%%% probléme?
+
+The entire rectangle in Fig 3.10 is called an LSTM "cell". It is analogous to the circle from the previous RNN diagram. These are the parts that make up the LSTM cell:
+
+\begin{enumerate}
+%1. The "Cell State"
+\item The "Cell State"
+%2. The "Hidden State"
+\item The "Hidden State"
+%3. The Gates: "Forget", "Input", and "Output"
+\item The Gates: "Forget", "Input", and "Output"
+\end{enumerate}
+
+LSTM uses a special mechanism of controlling the memorizing process, popularly referred to as \textit{gate mechanism}. The goals of gates in LSTM are to store the memory components in analog format and produce a probabilistic score by doing point-wise multiplication using sigmoid activation function, which outputs a number between 0 and 1. The gates in LSTM regulate the flow of information in and out of the LSTM cells. There are 3 types of gates. 
+
+\begin{itemize}
+	\item An input gate determines what new information should be added to the networks long-term memory, given the previous hidden state and new input data.
+
+	\item An output gate updates and finalizes the next hidden state.
+
+	\item A forget gate eliminates unnecessary information.
+\end{itemize}
+
+\subsection{"Cell State" vs "Hidden State"}
+				\textbf{Hidden State - Conceptual Interpretation}
+
+The characterization of a timestamp data can mean different things. For example, we are processing the phrase "the sky is blur, therefore the babe elephant is crying". If we want the LSTM network to be able to classify the sentiment of a word in the context of the sentence, the hidden state at t=3 would be an encoded version of "is", which we would then further process to obtain the predicted sentiment. If we want the LSTM network to be able to predict the next word based on the current series of words, the hidden state at t=3 would be an encoded version of the prediction for the next word (ideally, "blue"), which we would again process outside of the LSTM to get the predicted word. As seen, characterization is an abstract term that merely serves to illustrate how the hidden state is more concerned with the most recent time-step. Also, we need to note that hidden state does not equal the output or prediction, it is merely an encoding of the most recent time-step.
+\textbf{Cell State - Conceptual Interpretation}
+
+The cell state is more concerned with the entire data. If we are processing the word "elephant", the cell state contains information of all words right from the start of the phrase. As we can see in the Fig 3.10, each time a time-step pf data passes through an LSTM cell, a copy of the time-step data is filtered through a forget gate, and another copy through the input gate; the results of both gates are incorporated into the cell state from processing the previous time-step and gets passed on to get modified by the next time-step yet again. The weights in the forget gate and input gate figure out how to extract features from such information so as to determine which time-steps are important (high forget weights), which are not (low forget weights), and how to encode information from the current time-step into the cell state (input weights). As a result, not all time-steps are incorporated equally into the cell state -- some are more significant that others. 
+To summarize, the cell state is basically the global or aggregate memory of the LSTM network over all time-steps.
+
+
+\subsection{Core idea behind LSTMs}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The first step in LSTM is to decide what information will be thrown away from the cell state. This decision is made by a sigmoid layer called the "forget gate layer". It looks at $h_{t-1}$ and $x_t$ and outputs a number in the range of 0-1 for each number in the cell state $C_{t-1}$. A value of 0 means "let nothing through" while a value of 1 means "let everything through".
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 12cm]{./figures/ft.png}
+	\caption{Forget Gate}
+\end{figure}
+%where should f_t be put
+$$
+	f_t = \sigma(W_f\cdot [h_{t-1}, x_t] +b_f)
+$$
+
+The second step is to decide what new information is going to be stored in the cell state. It is divided into two parts. Firstly, a sigmoid layer called the "input gate layer" decides which values will be updated. Secondly, a tanh layer creates a vector of new values, $\tilde C_t$, that could be added to the cell state. In the next step, these two wiil be combined to create an update to the cell state.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 12cm]{./figures/step2.png}	
+	\caption{Input Gate}
+\end{figure}
+
+\begin{center}
+$	\begin{array}{ll}
+	i_t &= \sigma (W_i \cdot [h_{t-1}, x_t]+b_i)			\\
+	\tilde C_t &= tanh(W_C \cdot [h_{t-1, x_t}]+b_C)
+	\end{array}
+$
+\end{center}
+
+Now is the time to transform the old cell state $C_{t-1}$ into the new cell state, $C_t$. The old state will be multiplied by $f_t$, forgetting the irrelevant information. The input gate remembers relevant information and adds it to the current cell state with tanh activation.
+
+\begin{figure}[h]
+	\includegraphics[width = 12cm]{./figures/combo.png}
+	\caption{Figure 14: Cell state update mechanism}
+\end{figure}
+
+$$
+	C_t = f_t * C_{t-1} + i_t * \tilde C_t
+$$
+
+The final step is to decide the output. The output will be based on the cell state after filter. A sigmoid layer will be run to decide to output what parts of the cell state. Then put the cell state through tanh and multiply it by the output of the sigmoid layer so that only the decided parts will be outputted. 
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 12cm]{./figures/output.png}
+	
+	\caption{Output Gate}
+\end{figure}
+
+$$	\begin{aligned}
+%		$
+		o_t &= \sigma(W_o \cdot [h_{t-1},x_t], b_o)\\
+		h_t &= o_t*tanh(C_t)
+%		$
+	\end{aligned}
+$$
+%---------------------------
+
+
+
+\section{Sequence to sequence model}
+Sequence to sequence model is a model that tries to map input text with fixed length to output text fixed length where the length of input and output to the model may differ. This allows us to use this model in machine translation.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 12cm]{./figures/seq_MT.png}
+	
+	\caption{Machine Translation Model}
+\end{figure}
+
+Sequence to sequence model is divided in two phases, which are training phase and inference phase respectively. 
+
+\subsection{Training phase}
+Training phase is a process in 2 parts encoder and decoder. After setting up the encoder and decoder models, the models will be trained and every timestamp will be predicted by reading input word by word or char by char. Before going through training and testing, data needs to be cleaned and tokens need to be added to specify the start and end of sentences so that the model will understand when to end.
+
+\subsubsection{Encoder}
+The encoder is an LSTM network. At each timestamp word is read or processed and it captures the contextual information at every timestamp from the input sequences passed to the encoder model.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 14cm]{./figures/encoder_archi.png}
+	
+	\caption{Encoder architecture}
+\end{figure}
+
+$\bullet$ Xi: since we are going to use word-level encoding in our machine translation system, input at each timestamp will be each word in the sentence, which means in the example of Fig 17 X1 = 'Je', X2 = 'ne'. Each word is represented in the form of a vector. For this, each word is replaced by word index of that word in some corpus. Most frequent words have smaller word index than the less frequent words.
+
+$\bullet$ h0 and c0: initial hidden state and context vectors which are all zeros (generally) and fed at the 0th timestamp to the encoder. 
+
+$\bullet$ hi and ci: hidden state and context vectors after timestamp i. These vectors in simple terms represent what the encoder has seen until this timestamp. For example, h3 and c3 will remember that the network has seen "Je ne parle". The size of each of these vectors is equal to the number of units of LSTM. The state obtained after the last timestamp is fed into decoder as decoder initial states.
+
+$\bullet$ Yi: output at timestamp i. It is the probability distribution over the entire vocabulary which is generated by using the Softmax activation function. 
+\subsubsection{Decoder}
+The decoder is also an LSTM network that reads the entire target sequence or sentence word-by-word and predicts the same sequence offset by one timestamp. However, unlike encoder, decoder behaves differently in training and inference phase. Two special tokens need to be added to the output sentence. These tokens are "\textless start\textgreater" (at the beginning of the string) and "\textless end\textgreater" (at the end of the string). The model will be trained to predict the outputs by using backpropagation with time and appropriate loss function. 
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 14cm]{./figures/decoder_ar.png}
+	
+	\caption{Decoder architecture}
+\end{figure}
+
+\subsection{Inference phase}
+% how to generate the probability??????
+Machine learning model inference is the process of deploying a machine learning model to a production environment to infer a result from input data. At this point, the model will be processing new and unseen input data. When a model performs inference, it is producing a result based on the trained algorithm. This means model inference is within the deployment phase of a machine learning lifecycle. The results that are inferred are usually observed and continuously monitored, at which point the model can be retrained or optimised as a separate phase of a model lifecycle.
+
+After training the encoder-decoder model, the model will be tested on new unseen input sequences for which the target sequence is unknown. Here are the steps to process for decoding the test sequence:
+
+1. Encode the entire input sequence and initialize the decoder with the internal states of the encoder.
+
+2. Pass \textless start\textgreater as an input to the decoder.
+
+3. Run the decoder for one timestamp with the internal states.
+
+4. The output will be the probability for the next word. The word with the maximum probability will be selected.
+
+5. Pass the maximum probability word as an input to the decoder in the next timestamp and update the internal states with the current timestamp.
+
+6. Repeat steps 3-5 until \textless end\textgreater is generated or the maximum length of the target sequence is reached.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 5cm]{./figures/infe.png}
+	
+	\caption{Inference Phase}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\chapter{Experiment}
+\section*{Introduction}
+We have learned the method of Seq2Seq model with LSTM networks in chapter 3 and perplexity in chapter 2. In this chapter, we will realize Seq2Seq model in Pytorch and perplexity as the evaluation. One of disadvantage of Seq2Seq model is that previous memory would be lost to a large extent. The Seq2Seq model is going to be 0improved by using one technique introduced in an article, Sequence to Sequence Learning with Neural Networks, which is source sequence reversal. We are going to do a comparison in the value of perplexity to prove source sequence reversal can take effect. The model realization will be divided into three parts, which are data preparation, model establishment and model training.
+\minitoc
+\section{Improvement of Seq2Seq model}
+As we talked in previous chapter, we use LSTM networks in Seq2Seq model. However, we can find out that after the filter of three gates in LSTM networks the biggest loss would be previous memory and the current memory is biased towards the latest memory, which is also a deficiency of LSTM networks. Once the sequence is too long, the long-range dependency will be weak.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 10cm]{./figures/seq2seq.png}
+	
+	\caption{Seq2Seq model}
+\end{figure}
+
+Based on LSTM networks, we know that in Fig 17 the context vector C saves the most information at the source end at time 4, and the information at time 1 also saves very little. However when translating, the first translated word is likely to depend on the input at the source time 1, but at this time C contains very little information. If the first word is not translated well, as the input of its time step (the output of each time step of the target is the input of the next time step), then the subsequent quality is also greatly reduced.
+In response to this problem, academia has proposed various improvements. The easiest technique was introduced in the article, Sequence to Sequence Learning with Neural Networks\footnote{Ilya Sutskever, Oriol Vinyals, Quoc V. Le, 
+\begin{itshape}Sequence to Sequence Learning with Neural Networks,
+\end{itshape} 2014}, which is source sequence reversal. An example of source sequence reversal will be that the input of "I love you" becomes "you love I". In this way, the most saved context vector C must be I, and it will be more accurate when the decoder translates "I" for the first time.
+\section{Realization of Seq2Seq model in Pytorch}
+\subsection{Data Preparation}
+The data set uses the Multi30k data set that comes with pytorchtext, and selects French and English translations since word segmentation is easier. 
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 14cm]{./figures/en_train.png}
+	
+	\caption{English corpus}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 14cm]{./figures/fr_train.png}
+	
+	\caption{French corpus}
+\end{figure}
+The general process of processing data in pytorchtext is to define a field, process the data of the dataset through field, create a vocabulary list for field, and create a data iterator.
+
+1. Define field
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 10cm]{./figures/field.png}
+	
+	\caption{field}
+\end{figure}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 14cm]{./figures/process.png}
+	
+	\caption{processed corpus}
+\end{figure}
+
+2. Create vocabulary list and require every word appears at leats twice.
+
+3. After the vocabulary list is established, we establish an iterative index. If batch size=1, it does not matter if the text lengths are not equal. But when batch size>1, there is a problem. The same batch of samples are not the same length. Generally, we will pad the sentence to fill it up. Fortunately, the torchtext iterator automatically helps pad filling, and the BucketIterator iterator selects the most appropriate length as the fixed length of all sentences. Pad it when lower than the word length, and cut it when higher than this length. The fixed length is based on the most suitable length of all samples in the data set. 
+
+We must need the position of padding since when calculating the loss in loss function padding part doesn't participate in calculation.
+\subsection{Model Establishment}
+Seq2Seq model is mainly composed of two parts, namely the encoder and the decoder. We have 3 modules here, which are encoder, decoder, and Seq2Seq, which integrates the two parts. The network depth of the source and the target are both 4 layers.
+
+
+\subsection{Model Training}
+CrossEntropyLoss is used as loss function. We initialized parameter, established train and evaluate functions. The loss function is simply expressed as: perplexity. In chapter 2, we learned that the lower the perplexity is, the better the model is. 
+\subsection{Results}
+Since we are using CPU here. The convergence speed is low.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 8cm]{./figures/final-result.png}	
+	\caption{result with sequence reversal}
+\end{figure}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 8cm]{./figures/result-no-reversal.png}	
+	\caption{result without source sequence reversal}
+\end{figure}
+
+As we can see from the results, with using source sequence reversal, it can reach not only less time consumption but also lower perplexity. 
+
+
+\setcounter{secnumdepth}{-1}
+%
+%\mainmatter
+%
+
+\chapter{Conclusions and perspectives}
+\setcounter{secnumdepth}{3}
+
+A Turing machine is a machine capable of enumerating some arbitrary subset of valid strings of an alphabet. These strings are part of a recursively enumerable set. A Turing machine has a tape of infinite length on which it can perform read and write operations. The essential point of recursion theory is to study this notion of computability, e.f. which functions are computable and how computable they are. 
+
+Language models measure the fluency of the output and are an essential part of statistical machine translation. Mathematically, they assign each sentence a probability that indicates how likely that sentence is to occur in a text.N-Gram language models use the Markov assumption to break the probability of a sentence into the product of the probability of each word, given the history of preceding words. Language models are optimized on perplexity. 
+
+Neural machine translation models are often based on the seq2seq architecture. The seq2seq architecture is an encoder-decoder architecture which consists of two LSTM networks: the encoder LSTM and the decoder LSTM. The input to the encoder LSTM is the sentence in the original language; the input to the decoder LSTM is the sentence in the translated language with a start-of-sentence token. The output is the actual target sentence with an end-of-sentence token.
+
+Even though N-Gram is easy to train the parameter because of maximum likelihood estimation and includes all the information of previous $N-1$ words. It still has some disadvantages. For example, it can lead to out of vocabulary problem (zero probability problem) due to data sparse. in academia, some methods appeared to deal with this problem, such as sub-word N-gram, which deserves to dig deeper in the future. On the other hand, there are also some different ways to improve Seq2Seq model in NMT, such as introducing attention mechanism which was born to help memorize long source sentences in neural machine translation.
+
+Following is the final progress of the internship:
+
+\begin{figure}
+	\centering
+	\includegraphics[width = 16cm]{./figures/final_gantt.png}
+	\caption{Final Gantt}
+\end{figure}
+
+
+%\bibliographystyle{ametsoc2014}
+%\bibliography{/Users/yanghanning/Downloads/English_report-20220902/internship_MT.bib}
+
+
+
+%---------------------------
+\setcounter{secnumdepth}{-1}
+%\mainmatter
+
+\chapter{Bibliography}
+
+\setcounter{secnumdepth}{3}
+\subparagraph{[1]}Lingxiao WANG, 
+\begin{itshape}Outils et environnements pour l'amélioration incrémentale,\quad la post-édition contributive et l'évaluation continue de systèmes de TA. Application à la TA français-chinois,
+\end{itshape} Université de Grenoble, 2015.
+\subparagraph{[2]}Ying ZHANG,
+\begin{itshape}Modèles et outils pour des bases lexicales "métier" multilingues et contributives de grande taille, utilisables tant en traduction automatique et automatisé que pour des services dictionnairiques variés,
+\end{itshape}Université de Grenoble, 2016.
+\subparagraph{[3]}Davis, Martin, 
+\begin{itshape}Computability and unsolvability,
+\end{itshape} Courier Corporation, 1958.
+\subparagraph{[4]}Boitet, Christian and Blanchon, Hervé and Seligman, Mark and Bellynck, Valérie, 
+\begin{itshape}MT on and for the Web,
+\end{itshape} IEEE, 2010.
+\subparagraph{[5]}Deutsch, Daniel and Dror, Rotem and Roth, Dan, 
+\begin{itshape}Re-Examining System-Level Correlations of Automatic Summarization Evaluation Metrics,
+\end{itshape} arXiv preprint arXiv:2204.10216, 2022.
+\subparagraph{[6]}Peter F. Brown, Stephen A. Delle Pietra, Vincent J. Bella Pietra, Robert L. Mercer, 
+\begin{itshape}The mathematics of statistical machine translation: Parameter estimate,
+\end{itshape} Using Large Corpora, 1994.
+\subparagraph{[7]}Hartley Rogers Jr,
+\begin{itshape}Theory of recursive functions and effective computability,
+\end{itshape} MIT press, 1987.
+\subparagraph{[8]}Christian Boitet, 
+\begin{itshape}Un essai de réponse à quelques questions théoriques et pratiques liées à la traduction automatique: définition d'un système prototype,
+\end{itshape}Université Joseph-Fourier-Grenoble I, 1976.
+\subparagraph{[9]}Ilya Sutskever, Oriol Vinyals, Quoc V. Le, 
+\begin{itshape}Sequence to Sequence Learning with Neural Networks,
+\end{itshape} Advances in neural information processing systems, 2014.
+
+
+
+\end{document}
